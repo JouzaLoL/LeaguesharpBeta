@@ -1,12 +1,15 @@
 #region
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
+using Color = System.Drawing.Color;
 
 #endregion
 
@@ -277,7 +280,6 @@ namespace SmartRyze
         //Drawing
         private static void Drawing_OnDraw(EventArgs args)
         {
-
             //Main drawig.ng switch
             if (GetConfigBool("drawing.disableAll")) return;
 
@@ -298,31 +300,25 @@ namespace SmartRyze
             }
 
             //Combo Mode Drawing
-            var heropos = Drawing.WorldToScreen(ObjectManager.Player.Position);
+            var heropos = Drawing.WorldToScreen(Queuer.Player.Position);
             var comboMode = Config.Item("combo.mode").GetValue<StringList>().SelectedIndex.ToString();
-            if (GetConfigBool("drawing.drawComboMode"))
+            if (Config.Item("drawing.drawComboMode").GetValue<bool>())
             {
-                Drawing.DrawText(heropos.X, heropos.Y, Color.Green, comboMode);
+                Drawing.DrawText(heropos[0] - 70, heropos[1] + 40, Color.Green, "Combo Mode: " + comboMode);
             }
-            Drawing.DrawText(heropos.X - 70, heropos.Y + 40, Color.Green, comboMode);
 
+            //Killability
             if (target == null) return;
-            var targetpos = Drawing.WorldToScreen(target.Position);
-
-                //Killability
-            if (GetConfigBool("drawing.drawKillability"))
+            var targetpos = Drawing.WorldToScreen(Queuer.Target.Position);
+            if (Config.Item("drawing.drawKillability").GetValue<bool>())
             {
-                    Drawing.DrawText(targetpos.X, targetpos.Y, Color.Red,
-                        (target.Health < ComboDamage(target))
-                            ? "Killable!"
-                            : "Unkillable.");
-            }
-            Drawing.DrawText(targetpos.X, targetpos.Y, (target.Health < ComboDamage(target)
-                                ? Color.Green
-                                : Color.Red) ,
-                            (target.Health < ComboDamage(target))
-                                ? "Killable!"
-                                : "Unkillable.");
+            Drawing.DrawText(targetpos[0], targetpos[1], (target.Health < ComboDamage(target)
+                        ? Color.Green
+                        : Color.Red),
+                    (target.Health < ComboDamage(target))
+                        ? "Killable!"
+                        : "Unkillable.");
+            }           
         }
 
         //Anti Gapcloser
