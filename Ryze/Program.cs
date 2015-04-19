@@ -1,14 +1,11 @@
 #region
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
 using Color = System.Drawing.Color;
 
 #endregion
@@ -24,9 +21,6 @@ namespace SmartRyze
         public static SpellSlot IgniteSlot;
         public static Menu Config;
         public static Obj_AI_Hero Player = ObjectManager.Player;
-        // Custom vars
-        public static bool PacketCast;
-        public static bool DebugEnabled;
         // Items
         public static Items.Item Biscuit = new Items.Item(2010, 10);
         public static Items.Item HPpot = new Items.Item(2003, 10);
@@ -66,93 +60,93 @@ namespace SmartRyze
             Config.AddSubMenu(tsMenu);
 
             //Combo Menu
-            Config.AddSubMenu(new Menu("[SR] Combo Settings", "ryze.combo"));
-            Config.SubMenu("ryze.combo")
-                .AddItem(new MenuItem("combo.mode", "Combo Mode").SetValue(new StringList(new[] {"Burst", "Long"})));
-            Config.SubMenu("ryze.combo").AddItem(new MenuItem("combo.useR", "Use R in Combo").SetValue(true));
-            Config.SubMenu("ryze.combo").AddItem(new MenuItem("combo.smartAA", "Smart AA").SetValue(true));
-            Config.SubMenu("ryze.combo").AddItem(new MenuItem("combo.nochainW", "Don't W if already immobile").SetValue(true));
+            var combo = Config.AddSubMenu(new Menu("[SR] Combo Settings", "ryze.combo"));
+            {
+                combo.AddItem(new MenuItem("combo.mode", "Combo Mode").SetValue(new StringList(new[] {"Burst", "Long"})));
+                combo.AddItem(new MenuItem("combo.useR", "Use R in Combo").SetValue(true));
+                combo.AddItem(new MenuItem("combo.smartAA", "Smart AA").SetValue(true));
+                combo.AddItem(new MenuItem("combo.nochainW", "Don't W if already immobile").SetValue(true));
+            }
 
-            //Killsteal
-            Config.AddSubMenu(new Menu("[SR] Killsteal Settings", "ryze.killsteal"));
-            Config.SubMenu("ryze.killsteal")
-                .AddItem(new MenuItem("killsteal.enabled", "Smart KS Enabled").SetValue(true));
-            Config.SubMenu("ryze.killsteal")
-                .AddItem(new MenuItem("killsteal.useIgnite", "KS with Ignite").SetValue(true));
+            //Killsteal Menu
+            var killsteal = Config.AddSubMenu(new Menu("[SR] Killsteal Settings", "ryze.killsteal"));
+            {
+                killsteal.AddItem(new MenuItem("killsteal.enabled", "Smart KS Enabled").SetValue(true));
+                killsteal.AddItem(new MenuItem("killsteal.useIgnite", "KS with Ignite").SetValue(true));
+            }
 
             //Harass Menu
-            Config.AddSubMenu(new Menu("[SR] Harass Settings", "ryze.harass"));
-            Config.SubMenu("ryze.harass").AddItem(new MenuItem("harass.useW", "Use W in Harass")).SetValue(true);
+            var harass = Config.AddSubMenu(new Menu("[SR] Harass Settings", "ryze.harass"));
+            {
+                harass.AddItem(new MenuItem("harass.useW", "Use W in Harass")).SetValue(true);
+            }           
 
             //Farm Menu
-            Config.AddSubMenu(new Menu("[SR] Farming Settings", "ryze.farm"));
-            Config.SubMenu("ryze.farm").AddItem(new MenuItem("farm.useQ", "Farm with Q").SetValue(true));
-            Config.SubMenu("ryze.farm").AddItem(new MenuItem("farm.useW", "Farm with W").SetValue(true));
-            Config.SubMenu("ryze.farm").AddItem(new MenuItem("farm.useE", "Farm with E").SetValue(true));
+            var farm = Config.AddSubMenu(new Menu("[SR] Farming Settings", "ryze.farm"));
+            {
+                farm.AddItem(new MenuItem("farm.useQ", "Farm with Q").SetValue(true));
+                farm.AddItem(new MenuItem("farm.useW", "Farm with W").SetValue(true));
+                farm.AddItem(new MenuItem("farm.useE", "Farm with E").SetValue(true));               
+            }            
 
             //Laneclear Menu
-            Config.AddSubMenu(new Menu("[SR] Laneclear Settings", "ryze.laneclear"));
-            Config.SubMenu("ryze.laneclear").AddItem(new MenuItem("laneclear.useQ", "Laneclear with Q").SetValue(true));
-            Config.SubMenu("ryze.laneclear").AddItem(new MenuItem("laneclear.useW", "Laneclear with W").SetValue(true));
-            Config.SubMenu("ryze.laneclear").AddItem(new MenuItem("laneclear.useE", "Laneclear with E").SetValue(true));
+            var laneclear = Config.AddSubMenu(new Menu("[SR] Laneclear Settings", "ryze.laneclear"));
+            {
+                laneclear.AddItem(new MenuItem("laneclear.useQ", "Laneclear with Q").SetValue(true));
+                laneclear.AddItem(new MenuItem("laneclear.useW", "Laneclear with W").SetValue(true));
+                laneclear.AddItem(new MenuItem("laneclear.useE", "Laneclear with E").SetValue(true));
+            }
 
             //Jungle Clear Menu
-            Config.AddSubMenu(new Menu("[SR] Jungle Clear Settings", "ryze.jungle"));
-            Config.SubMenu("ryze.jungle").AddItem(new MenuItem("jungle.useQ", "Clear with Q").SetValue(true));
-            Config.SubMenu("ryze.jungle").AddItem(new MenuItem("jungle.useW", "Clear with W").SetValue(true));
-            Config.SubMenu("ryze.jungle").AddItem(new MenuItem("jungle.useE", "Clear with E").SetValue(true));
-
+            var jungleclear = Config.AddSubMenu(new Menu("[SR] Jungle Clear Settings", "ryze.jungle"));
+            {
+                jungleclear.AddItem(new MenuItem("jungle.useQ", "Clear with Q").SetValue(true));
+                jungleclear.AddItem(new MenuItem("jungle.useW", "Clear with W").SetValue(true));
+                jungleclear.AddItem(new MenuItem("jungle.useE", "Clear with E").SetValue(true));
+            }
+            
             //Drawing Menu
-            Config.AddSubMenu(new Menu("[SR] Draw Settings", "ryze.drawing"));
-            Config.SubMenu("ryze.drawing").AddItem(new MenuItem("drawing.disableAll", "Disable drawing").SetValue(false));
-            Config.SubMenu("ryze.drawing").AddItem(new MenuItem("drawing.drawComboMode", "Draw Combo Mode").SetValue(false));
-            Config.SubMenu("ryze.drawing").AddItem(new MenuItem("drawing.drawKillability", "Draw Killability").SetValue(false));
-            Config.SubMenu("ryze.drawing").AddItem(new MenuItem("drawing.target", "Highlight Target").SetValue(new Circle(true,Color.FromArgb(255, 255, 255, 0))));
-            Config.SubMenu("ryze.drawing").AddItem(new MenuItem("drawing.drawQ", "Draw Q Range").SetValue(new Circle(true,Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("ryze.drawing").AddItem(new MenuItem("drawing.drawW", "Draw W Range").SetValue(new Circle(true,Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("ryze.drawing").AddItem(new MenuItem("drawing.drawDamage.enabled", "Draw Damage").SetValue(true));
-            Config.SubMenu("ryze.drawing").AddItem(new MenuItem("drawing.drawDamage.fill", "Draw Damage Fill Color").SetValue(new Circle(true,Color.FromArgb(90, 255, 169, 4))));
-
-            //Misc Menu
-            Config.AddSubMenu(new Menu("[SR] Misc Settings", "ryze.misc"));
-            Config.SubMenu("ryze.misc")
-                .AddItem(new MenuItem("misc.interruptGapclosers", "Interrupt Gapclosers").SetValue(true));
-            Config.SubMenu("ryze.misc")
-                .AddItem(new MenuItem("misc.usePackets", "Use Packets to Cast Spells").SetValue(true));
-            Config.SubMenu("ryze.misc").AddItem(new MenuItem("misc.debug", "Enable debug").SetValue(false));
-            Config.SubMenu("ryze.misc")
-                .AddItem(new MenuItem("misc.autoSEmbrace.enabled", "Auto Serapths Embrace").SetValue(true));
-            Config.SubMenu("ryze.misc")
-                .AddItem(new MenuItem("misc.autoSEmbrace.percent", "SEmbrace HP %").SetValue(new Slider(10)));
-            Config.SubMenu("ryze.misc").AddItem(new MenuItem("misc.autoR.enabled", "Auto R when HP low").SetValue(true));
-            Config.SubMenu("ryze.misc")
-                .AddItem(new MenuItem("misc.autoR.percent", "Auto R HP %").SetValue(new Slider(10)));
+            var drawing = Config.AddSubMenu(new Menu("[SR] Draw Settings", "ryze.drawing"));
+            {
+                drawing.AddItem(new MenuItem("drawing.disableAll", "Disable drawing").SetValue(false));
+                drawing.AddItem(new MenuItem("drawing.drawComboMode", "Draw Combo Mode").SetValue(true));
+                drawing.AddItem(new MenuItem("drawing.drawKillability", "Draw Killability").SetValue(true));
+                drawing.AddItem(new MenuItem("drawing.target", "Highlight Target").SetValue(new Circle(true,Color.FromArgb(255, 255, 255, 0))));
+                drawing.AddItem(new MenuItem("drawing.drawQ", "Draw Q Range").SetValue(new Circle(true,Color.FromArgb(255, 255, 255, 255))));
+                drawing.AddItem(new MenuItem("drawing.drawW", "Draw W Range").SetValue(new Circle(true,Color.FromArgb(255, 255, 255, 255))));
+                drawing.AddItem(new MenuItem("drawing.drawDamage.enabled", "Draw Damage").SetValue(true));
+                drawing.AddItem(new MenuItem("drawing.drawDamage.fill", "Draw Damage Fill Color").SetValue(new Circle(true,Color.FromArgb(90, 255, 169, 4))));
+            }
 
             //Resources manager
-            Config.AddSubMenu(new Menu("[SR] Resources Manager", "ryze.resmanager"));
-            Config.SubMenu("ryze.resmanager")
-                .AddItem(new MenuItem("resmanager.enabled", "Resource Manager enabled").SetValue(true));
-            //Config.SubMenu("ryze.resmanager").AddItem(new MenuItem("resmanager.preserveforCombo", "Preserve mana for Combo").SetValue(true));
-            Config.SubMenu("ryze.resmanager")
-                .AddItem(new MenuItem("resmanager.harass", "Harass Mana %").SetValue(new Slider(50)));
-            Config.SubMenu("ryze.resmanager")
-                .AddItem(new MenuItem("resmanager.farm", "Farm Mana %").SetValue(new Slider(50)));
-            Config.SubMenu("ryze.resmanager")
-                .AddItem(new MenuItem("resmanager.laneclear", "Laneclear Mana %").SetValue(new Slider(50)));
-            Config.SubMenu("ryze.resmanager").AddItem(new MenuItem("resmanager.hp", "Health Pot").SetValue(true));
-            Config.SubMenu("ryze.resmanager")
-                .AddItem(new MenuItem("resmanager.hp.percent", "Health Pot %").SetValue(new Slider(35, 1)));
-            Config.SubMenu("ryze.resmanager").AddItem(new MenuItem("resmanager.mp", "Mana Pot").SetValue(true));
-            Config.SubMenu("ryze.resmanager")
-                .AddItem(new MenuItem("resmanager.mp.percent", "Mana Pot %").SetValue(new Slider(35, 1)));
-            Config.SubMenu("ryze.resmanager")
-                .AddItem(new MenuItem("resmanager.antiignite", "Auto pot if Ignited / Morde R").SetValue(true));
+            var resmanager = Config.AddSubMenu(new Menu("[SR] Resources Manager", "ryze.resmanager"));
+            {
+                resmanager.AddItem(new MenuItem("resmanager.enabled", "Resource Manager enabled").SetValue(true));
+                resmanager.AddItem(new MenuItem("resmanager.preserveforCombo", "Preserve mana for Combo").SetValue(true));
+                resmanager.AddItem(new MenuItem("resmanager.harass", "Harass Mana %").SetValue(new Slider(50)));
+                resmanager.AddItem(new MenuItem("resmanager.farm", "Farm Mana %").SetValue(new Slider(50)));
+                resmanager.AddItem(new MenuItem("resmanager.laneclear", "Laneclear Mana %").SetValue(new Slider(50)));
+                resmanager.AddItem(new MenuItem("resmanager.hp", "Health Pot").SetValue(true));
+                resmanager.AddItem(new MenuItem("resmanager.hp.percent", "Health Pot %").SetValue(new Slider(35, 1)));
+                resmanager.AddItem(new MenuItem("resmanager.mp", "Mana Pot").SetValue(true));
+                resmanager.AddItem(new MenuItem("resmanager.mp.percent", "Mana Pot %").SetValue(new Slider(35, 1)));
+                resmanager.AddItem(new MenuItem("resmanager.antiignite", "Auto pot if Ignited / Morde R").SetValue(true));
+            }     
+
+            //Misc Menu
+            var misc = Config.AddSubMenu(new Menu("[SR] Misc Settings", "ryze.misc"));
+            {
+                misc.AddItem(new MenuItem("misc.interruptGapclosers", "Interrupt Gapclosers").SetValue(true));
+                misc.AddItem(new MenuItem("misc.usePackets", "Use Packets to Cast Spells").SetValue(true));
+                misc.AddItem(new MenuItem("misc.debug", "Enable debug").SetValue(false));
+                misc.AddItem(new MenuItem("misc.autoSEmbrace.enabled", "Auto Serapths Embrace").SetValue(true));
+                misc.AddItem(new MenuItem("misc.autoSEmbrace.percent", "SEmbrace HP %").SetValue(new Slider(10)));
+                misc.AddItem(new MenuItem("misc.autoR.enabled", "Auto R when HP low").SetValue(true));
+                misc.AddItem(new MenuItem("misc.autoR.percent", "Auto R HP %").SetValue(new Slider(10)));
+            }
 
             //Make menu visible
             Config.AddToMainMenu();
-
-            PacketCast = Config.Item("misc.usePackets").GetValue<bool>();
-            DebugEnabled = Config.Item("misc.debug").GetValue<bool>();
 
             //Damage Drawing
             DamageIndicator.DamageToUnit = ComboDamage;
@@ -181,10 +175,8 @@ namespace SmartRyze
 
             //Announce that the assembly has been loaded
             Game.PrintChat("<font color=\"#00BFFF\">Smart Ryze -</font> <font color=\"#FFFFFF\">Loaded</font>");
-            Game.PrintChat(
-                "<font color=\"#00BFFF\">Smart Ryze -</font> <font color=\"#FFFFFF\">Version: " + Assembly.GetExecutingAssembly().GetName().Version+ "</font>");
-            Game.PrintChat(
-                "<font color=\"#00BFFF\">Smart Ryze -</font> <font color=\"#FFFFFF\">Thank you for using my scripts, feel free to suggest features and report bugs on the forums.</font>");
+            Game.PrintChat("<font color=\"#00BFFF\">Smart Ryze -</font> <font color=\"#FFFFFF\">Version: " + Assembly.GetExecutingAssembly().GetName().Version + "</font>");
+            Game.PrintChat("<font color=\"#00BFFF\">Smart Ryze -</font> <font color=\"#FFFFFF\">Thank you for using my scripts, feel free to suggest features and report bugs on the forums.</font>");
         }
 
         public static void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
@@ -201,7 +193,6 @@ namespace SmartRyze
 
         private static void Game_OnUpdate(EventArgs args)
         {
-
             if (!Orbwalking.CanMove(40)) return;
             if (Player.IsDead) return;
 
@@ -229,7 +220,6 @@ namespace SmartRyze
             }
 
             OnUpdateFunctions();
-
         }
 
         private static void OnUpdateFunctions()
@@ -244,15 +234,14 @@ namespace SmartRyze
         //No AA in Combo
         private static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-
             if (GetConfigBool("combo.smartAA") && Orbwalker.ActiveMode.Equals(Orbwalking.OrbwalkingMode.Combo))
                 args.Process = !(Q.IsReady() || W.IsReady() || E.IsReady());
-        }        
+        }
 
         //Config Bool shortcut
-        static bool GetConfigBool(string c)
+        private static bool GetConfigBool(string item)
         {
-            return Config.Item(c).GetValue<bool>();
+            return Config.Item(item).GetValue<bool>();
         }
 
         //Auto Functions
@@ -260,9 +249,9 @@ namespace SmartRyze
         {
             var sEmbracePercent = (Config.Item("misc.autoSEmbrace.percent").GetValue<Slider>().Value/100);
 
-            //if (!GetConfigBool("misc.autoSEmbrace.enabled")) return;
+            if (!GetConfigBool("misc.autoSEmbrace.enabled")) return;
             if (!Items.HasItem(SEmbrace.Id)) return;
-            if (Player.HealthPercent < sEmbracePercent)
+            if (Player.Health/Player.MaxHealth < sEmbracePercent)
             {
                 Items.UseItem(SEmbrace.Id);
             }
@@ -274,7 +263,7 @@ namespace SmartRyze
             var rPercent = Config.Item("misc.autoR.percent").GetValue<Slider>().Value/100;
 
             if (!GetConfigBool("misc.autoR.enabled")) return;
-            if (R.IsReady() && Player.HealthPercent <= rPercent) R.Cast(PacketCast);
+            if (R.IsReady() && Player.HealthPercent <= rPercent) R.Cast();
         }
 
         //Drawing
@@ -300,7 +289,7 @@ namespace SmartRyze
             }
 
             //Combo Mode Drawing
-            var heropos = Drawing.WorldToScreen(Queuer.Player.Position);
+            var heropos = Drawing.WorldToScreen(Player.Position);
             var comboMode = Config.Item("combo.mode").GetValue<StringList>().SelectedIndex.ToString();
             if (Config.Item("drawing.drawComboMode").GetValue<bool>())
             {
@@ -309,16 +298,29 @@ namespace SmartRyze
 
             //Killability
             if (target == null) return;
-            var targetpos = Drawing.WorldToScreen(Queuer.Target.Position);
-            if (Config.Item("drawing.drawKillability").GetValue<bool>())
+            var targetpos = Drawing.WorldToScreen(target.Position);
+            if (GetConfigBool("drawing.drawKillability"))
             {
-            Drawing.DrawText(targetpos[0], targetpos[1], (target.Health < ComboDamage(target)
-                        ? Color.Green
-                        : Color.Red),
+                Drawing.DrawText(targetpos[0], targetpos[1], (target.Health < ComboDamage(target)
+                    ? Color.Green
+                    : Color.Red),
                     (target.Health < ComboDamage(target))
                         ? "Killable!"
                         : "Unkillable.");
-            }           
+            }
+
+            //Out of Mana drawing
+            if (Player.IsDead) return;
+            if (!GetConfigBool("drawing.outofmana")) return;
+            var outofmanatime = (Player.MaxMana - Player.Mana) / Player.FlatPARRegenMod;
+            var manaNeeded = 3*Q.Instance.ManaCost + W.Instance.ManaCost + E.Instance.ManaCost;
+            if (Player.Mana < manaNeeded)
+            {
+                Drawing.DrawText(heropos[0] - 140, heropos[1] + 80, Color.Blue, "Out of Mana for another " + outofmanatime + " seconds.");
+            }
+
+                
+
         }
 
         //Anti Gapcloser
@@ -327,9 +329,7 @@ namespace SmartRyze
             if (!GetConfigBool("misc.interruptGapclosers")) return;
             if (!gapcloser.Sender.IsValidTarget(W.Range)) return;
 
-            W.CastOnUnit(gapcloser.Sender, PacketCast);
-
-            if (DebugEnabled) Console.WriteLine("Debug - W Casted to interrupt GAPCLOSER");
+            W.CastOnUnit(gapcloser.Sender);
         }
 
         //Killsteal
@@ -343,24 +343,21 @@ namespace SmartRyze
                 target.Health < Q.GetDamage(target) &&
                 Q.IsInRange(target))
             {
-                Q.Cast(target, PacketCast);
-                if (DebugEnabled) Console.WriteLine("Debug - Q casted to KILLSTEAL.");
+                Q.Cast(target);
             }
 
             if (E.IsReady() &&
                 target.Health < E.GetDamage(target) &&
-                target.IsValidTarget(W.Range))
+                E.IsInRange(target))
             {
-                E.Cast(target, PacketCast);
-                if (DebugEnabled) Console.WriteLine("Debug - Q casted to KILLSTEAL.");
+                E.Cast(target);
             }
 
             if (W.IsReady() &&
                 target.Health < W.GetDamage(target) &&
-                target.IsValidTarget(Q.Range))
+                W.IsInRange(target))
             {
-                W.Cast(target, PacketCast);
-                if (DebugEnabled) Console.WriteLine("Debug - Q casted to KILLSTEAL.");
+                W.Cast(target);
             }
 
             if (IgniteSlot == SpellSlot.Unknown ||
@@ -369,7 +366,6 @@ namespace SmartRyze
             if ((Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) < target.Health)) return;
 
             Player.Spellbook.CastSpell(IgniteSlot, target);
-            if (DebugEnabled) Console.WriteLine("Debug - Ignite casted to KILLSTEAL.");
         }
 
         //Resource Manager
@@ -380,7 +376,7 @@ namespace SmartRyze
             //Auto Ignite Counter
             if (GetConfigBool("resmanager.ignite"))
             {
-                if (Player.HasBuff("summonerdot") || Player.HasBuff("MordekaiserChildrenOfTheGrave"))
+                if (Player.HasBuff("summonerdot", true) || Player.HasBuff("MordekaiserChildrenOfTheGrave", true))
                 {
                     if (!Player.InFountain())
                     {
@@ -388,19 +384,16 @@ namespace SmartRyze
                             !Player.HasBuff("ItemMiniRegenPotion"))
                         {
                             Biscuit.Cast(Player);
-                            if (DebugEnabled) Console.WriteLine("Debug - Biscuit used to counter IGNITE.");
                         }
                         else if (Items.HasItem(HPpot.Id) && Items.CanUseItem(HPpot.Id) &&
                                  !Player.HasBuff("RegenerationPotion") && !Player.HasBuff("Health Potion"))
                         {
                             HPpot.Cast(Player);
-                            if (DebugEnabled) Console.WriteLine("Debug - HP Pot used to counter IGNITE.");
                         }
                         else if (Items.HasItem(Flask.Id) && Items.CanUseItem(Flask.Id) &&
                                  !Player.HasBuff("ItemCrystalFlask"))
                         {
                             Flask.Cast(Player);
-                            if (DebugEnabled) Console.WriteLine("Debug - Flask used to counter IGNITE.");
                         }
                     }
                 }
@@ -408,23 +401,25 @@ namespace SmartRyze
 
             if (ObjectManager.Player.HasBuff("Recall") || Player.InFountain() && Player.InShop()) return;
 
+            var hp = Player.MaxHealth * (Config.Item("resmanager.hp.percent").GetValue<Slider>().Value/100.0);
+            var mp = Player.MaxMana * (Config.Item("resmanager.mp.percent").GetValue<Slider>().Value / 100.0);
+
             //Health Pots
             if (!GetConfigBool("resmanager.hp")) return;
-            if (Player.HealthPercent <= Config.Item("resmanager.hp.percent").GetValue<Slider>().Value/100.0 &&
+            if (Player.Health <= hp &&
                 !Player.HasBuff("RegenerationPotion", true))
             {
                 Items.UseItem(2003);
-                if (DebugEnabled) Console.WriteLine("Debug - HP Pot used because of LOW HP");
             }
 
             //Mana Pots
             if (!GetConfigBool("resmanager.mp")) return;
-            if (Player.ManaPercent <= Config.Item("resmanager.mp.percent").GetValue<Slider>().Value/100.0 &&
+            if (Player.Mana <= mp &&
                 !Player.HasBuff("FlaskOfCrystalWater", true))
             {
                 Items.UseItem(2004);
-                if (DebugEnabled) Console.WriteLine("Debug - MP Pot used because of LOW MP");
             }
+
         }
 
         //Combo Handler
@@ -435,7 +430,7 @@ namespace SmartRyze
             //Smart R
             if (GetConfigBool("combo.useR") && R.IsReady())
             {
-                if (target.MoveSpeed > Player.MoveSpeed && target.Distance(Player, false) < 1500) R.Cast(PacketCast);
+                if (target.MoveSpeed > Player.MoveSpeed && target.Distance(Player, false) < 1500) R.Cast();
             }
 
             //Smart W
@@ -444,10 +439,10 @@ namespace SmartRyze
                 Queuer.Add("W", target);
             }
             else if (target.IsInvulnerable)
-			{
-				Queuer.Add("W", target);
-				return;
-			}
+            {
+                Queuer.Add("W", target);
+                return;
+            }
 
             var comboMode = Config.Item("combo.mode").GetValue<StringList>().SelectedIndex;
 
@@ -470,19 +465,15 @@ namespace SmartRyze
         {
             if (target.IsValid)
             {
-            Queuer.Add("Q", target);
-            Queuer.Add("W", target);
-            Queuer.Add("E", target);
-            Queuer.Add("Q", target);
-            }
-            else if (Math.Abs(Player.PercentCooldownMod) >= 0.2)
-            {
                 Queuer.Add("Q", target);
                 Queuer.Add("W", target);
                 Queuer.Add("E", target);
                 Queuer.Add("Q", target);
             }
-            
+            else if (Math.Abs(Player.PercentCooldownMod) >= 0.2)
+            {
+                Combo_Long(target);
+            }
         }
 
         private static void Combo_Long(Obj_AI_Base target)
@@ -491,8 +482,6 @@ namespace SmartRyze
             Queuer.Add("W", target);
             Queuer.Add("Q", target);
             Queuer.Add("E", target);
-            Queuer.Add("Q", target);
-            Queuer.Add("R");
             Queuer.Add("Q", target);
         }
 
@@ -532,7 +521,7 @@ namespace SmartRyze
                             HealthPrediction.GetHealthPrediction(minion, (int) (Player.Distance(minion.Position))) <=
                             Player.GetSpellDamage(minion, SpellSlot.Q)))
                 {
-                    Q.CastOnUnit(minion, PacketCast);
+                    Q.CastOnUnit(minion);
                     return;
                 }
             }
@@ -570,21 +559,30 @@ namespace SmartRyze
         private static void LaneClear()
         {
             //if (Queuer.Queue.Count > 0) return;
-            var minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy,MinionOrderTypes.MaxHealth);
+            var minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy,
+                MinionOrderTypes.MaxHealth);
             var laneclearMana = Player.MaxMana*(Config.Item("resmanager.laneclear").GetValue<Slider>().Value/100.0);
             if (Player.Mana < laneclearMana) return;
 
             foreach (var minion in minions)
             {
                 if (GetConfigBool("laneclear.useQ"))
-                    Q.CastOnUnit(minion, PacketCast);
+                    Q.CastOnUnit(minion);
 
                 if (GetConfigBool("laneclear.useW"))
-                    W.CastOnUnit(minion, PacketCast);
+                    W.CastOnUnit(minion);
 
                 if (GetConfigBool("laneclear.useE"))
-                    E.CastOnUnit(minion, PacketCast);
+                    E.CastOnUnit(minion);
             }
+            /*
+            if (Player.HasBuff("despereatepower", true))
+            {
+                foreach (var rMinion in minions.Where(x => Q.GetCircularFarmLocation(minions, 300).MinionsHit > 3))
+                {
+                    Q.CastOnUnit(rMinion);
+                }
+            }*/
         }
 
         //Jungleclear

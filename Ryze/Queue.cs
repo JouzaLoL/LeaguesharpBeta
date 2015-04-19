@@ -9,7 +9,7 @@ namespace SmartRyze
     {
         public static List<String> Queue = new List<string>();
         public static Obj_AI_Base Target;
-        public static Obj_AI_Base Player = ObjectManager.Player;
+        public static Obj_AI_Hero Player = ObjectManager.Player;
 
         public static void DoQueue()
         {
@@ -62,7 +62,7 @@ namespace SmartRyze
             if (Program.Q.IsReady())
             {
 
-                Program.Q.Cast(target, Program.PacketCast);
+                Program.Q.Cast(target);
             }
         }
 
@@ -78,12 +78,12 @@ namespace SmartRyze
             {
                 if (!target.IsImmovable)
                 {
-                    Program.W.CastOnUnit(target, Program.PacketCast);
+                    Program.W.CastOnUnit(target);
                 }
             }
             else
             {
-                Program.W.CastOnUnit(target, Program.PacketCast);
+                Program.W.CastOnUnit(target);
             }
         }
 
@@ -98,7 +98,7 @@ namespace SmartRyze
 
             if (Program.E.IsReady())
             {
-                Program.E.CastOnUnit(target, Program.PacketCast);
+                Program.E.CastOnUnit(target);
             }
         }
 
@@ -112,7 +112,7 @@ namespace SmartRyze
 
             if (Program.R.IsReady())
             {
-                Program.R.Cast(Program.PacketCast);
+                Program.R.Cast();
             }
         }
     }
